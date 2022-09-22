@@ -74,8 +74,7 @@ Meteor.startup(() => {
       }).fetch().forEach(t => {
         Tasks.upsert({
           task: t.task,
-          backlog: true,
-          done: true
+          backlog: true
         }, {
           $set: {
             task: t.task,

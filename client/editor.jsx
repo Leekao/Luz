@@ -15,7 +15,12 @@ const RecurringTasks = ({days}) => {
     setNewTask('')
   }
   console.log({backlogTasks})
-  return <div>
+  return <div style={{
+    padding: 5,
+    maxHeight: '40vh',
+    marginBottom: 15,
+    border: 'solid thin black' 
+  }}>
     <div>{`${days===7 ? 'Weekly' : 'Daily'}`}</div>
     <div>
       <form onSubmit={saveNewTask}>
@@ -39,8 +44,12 @@ const RecurringTasks = ({days}) => {
         />
       </form>
     </div>
-  <div>
-    {backlogTasks && (
+  <div style={{
+    overflowY: 'auto',
+    padding: 5,
+    maxHeight: '30vh'
+  }}>
+    {backlogTasks.length>0 && (
       backlogTasks.map(({_id, task}) => 
         <div style={{
           border: 'solid thin black',
@@ -51,7 +60,7 @@ const RecurringTasks = ({days}) => {
         }}
           key={_id}
           className={`flex`}>
-              <div u
+              <div
               style={{flexGrow:1}}
               onClick={e => Meteor.call('delete rec task', _id)}
               >X</div>
@@ -65,7 +74,7 @@ const RecurringTasks = ({days}) => {
   </div>
 }
 
-const DraggableList = ({uniqueId, items}) => {
+const DraggableList = ({uniqueId, items, startIndex}) => {
   if (items.length == 0 || items[0]==undefined) return <div></div>
   console.log({items})
   return (
@@ -80,10 +89,10 @@ const DraggableList = ({uniqueId, items}) => {
             {...provided.droppableProps}
             ref={provided.innerRef}
           >
-            {items.map((item, index) => (
+            {items.map((item, index) => (index>startIndex) && (
               <Draggable key={item._id} draggableId={item._id} index={index}>
                 {(provided) => {
-                  const {_id, hour, task, done} = item
+                  const {_id, hour, task, done, date} = item
                   const visibility = (task.startsWith('__Empty'))
                   ? 'hidden'
                   : 'visible'
@@ -91,12 +100,14 @@ const DraggableList = ({uniqueId, items}) => {
                   let blink = ''
                   if (color == 'black') {
                     const dateCheck = new Date()
-                    dateCheck.setHours(hour,0)
-                    if (new Date() > dateCheck) {
-                      color = 'red'
-                      dateCheck.setHours(hour,59)
-                      if (new Date() < dateCheck) {
-                        blink = 'blink_me'
+                    if (dateCheck.getDate() == date) {
+                      dateCheck.setHours(hour,0)
+                      if (new Date() > dateCheck) {
+                        color = 'red'
+                        dateCheck.setHours(hour,59)
+                        if (new Date() < dateCheck) {
+                          blink = 'blink_me'
+                        }
                       }
                     }
                   }
@@ -142,7 +153,6 @@ const DraggableList = ({uniqueId, items}) => {
           </div>
         )}
       </Droppable>
-
   )
 }
 
@@ -157,7 +167,7 @@ const DayView = ({date, lists}) => {
   useEffect(() => {
     console.log('empty tasks created')
     day.tasks = []
-    for (let i=emptyCounter; i <= emptyCounter+24; i++) {
+    for (let i=emptyCounter; i <= emptyCounter+23; i++) {
       day.tasks.push({
         task: `__Empty${i}`,
         _id: `__Empty${i}`,
@@ -197,14 +207,6 @@ const DayView = ({date, lists}) => {
             padding: '1px 7.5px',
           }}
           className='flex-initial'>
-          <div>0</div>
-          <div>1</div>
-          <div>2</div>
-          <div>3</div>
-          <div>4</div>
-          <div>5</div>
-          <div>6</div>
-          <div>7</div>
           <div>8</div>
           <div>9</div>
           <div>10</div>
@@ -222,7 +224,7 @@ const DayView = ({date, lists}) => {
           <div>22</div>
           <div>23</div>
         </div>
-      <DraggableList uniqueId={uniqueId} items={itemList} setItems={setItemList} />
+      <DraggableList startIndex={7} uniqueId={uniqueId} items={itemList} setItems={setItemList} />
       </div>
     </div>
   )
@@ -313,7 +315,7 @@ export const TomorrowEditor = () => {
           }}
           className="backlog flex-initial">
             <div>Back Log</div>
-            <DraggableList lists={lists} uniqueId={'backlog'} items={backlog} setItems={setBacklog} />
+            <DraggableList startIndex={0} lists={lists} uniqueId={'backlog'} items={backlog} setItems={setBacklog} />
         </div>
         <div style={{
             margin: "5px"

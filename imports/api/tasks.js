@@ -8,15 +8,19 @@ if (Meteor.isServer) {
 
   Meteor.methods({
     "delete rec task": (_id) => {
+      console.log(`deleting rec task`)
       RecTasks.remove({_id})
     },
     "delete": (_id) => {
+      console.log(`deleting task`)
       Tasks.remove({_id})
     },
     "done": (_id, done) => {
+      console.log(`marking donek`)
       Tasks.update({_id},{$set: {done}})
     },
     "new rec task": ({days, newTask}) => {
+      console.log(`creating new rec task`)
       const query = (days === 7)
         ? {weekly: true}
         : {daily: true}
@@ -26,12 +30,14 @@ if (Meteor.isServer) {
       })
     },
     "new task": (task) => {
+      console.log(`creating new task`)
       Tasks.insert({
         task,
         backlog: true
       })
     },
     "save": (lists) => {
+      console.log(`saving lists`)
       const {backlog, ...days} = lists
       const backlogIds = backlog.map(t => t._id) 
       const affected = Tasks.update({
